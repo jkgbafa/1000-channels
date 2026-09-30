@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14263f">
 <title>Channels</title>
 <style>
   :root {
@@ -10,12 +11,17 @@
     --edge: rgba(255,255,255,.22);
     --ink: #f2f6ff;
     --dim: rgba(226,236,255,.62);
+    --gap: clamp(12px, 1.2vw, 18px);
+    --shadow: 0 2px 10px rgba(6,18,34,.45);
+    --helvetica: "Helvetica Neue", Helvetica, Arial, sans-serif;
   }
   * { box-sizing: border-box; margin: 0; }
   body {
     min-height: 100vh;
-    padding: clamp(28px, 5vw, 72px) clamp(20px, 5vw, 72px) 96px;
-    font: 400 16px/1.45 -apple-system, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Inter, system-ui, sans-serif;
+    padding: clamp(32px, 5vw, 76px) max(clamp(20px, 5vw, 72px), env(safe-area-inset-right))
+             calc(96px + env(safe-area-inset-bottom)) max(clamp(20px, 5vw, 72px), env(safe-area-inset-left));
+    -webkit-tap-highlight-color: transparent;
+    font: 400 16px/1.45 -apple-system, "SF Pro Text", var(--helvetica);
     color: var(--ink);
     -webkit-font-smoothing: antialiased;
     background: #14263f radial-gradient(120% 90% at 18% -10%, #4b7fb5 0%, #2a4f7c 38%, #14263f 78%) fixed;
@@ -27,101 +33,176 @@
   body::before { width: 46vw; height: 46vw; top: -14vw; right: -8vw; background: rgba(125,178,230,.38); }
   body::after  { width: 38vw; height: 38vw; bottom: -14vw; left: -10vw; background: rgba(58,104,160,.55); }
 
-  header { max-width: 1320px; margin: 0 auto clamp(28px, 4vw, 52px); }
+  header { max-width: 1320px; margin: 0 auto clamp(30px, 4vw, 56px); text-align: center; }
   h1 {
-    font-size: clamp(38px, 7vw, 76px); font-weight: 700; letter-spacing: -.035em; line-height: 1.02;
+    font-family: var(--helvetica);
+    text-wrap: balance;
+    font-size: clamp(34px, 6.4vw, 72px); font-weight: 700; letter-spacing: -.028em; line-height: 1.04;
+    text-shadow: 0 2px 14px rgba(6,18,34,.42);
   }
-  h1 b { font-weight: 700; }
-  .stats { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
-  .stat {
-    padding: 12px 20px; border-radius: 16px;
-    background: var(--glass); border: 1px solid var(--edge);
-    backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%);
+  /* Inline rather than a flex child, so it stays glued to the number when the heading wraps. */
+  h1 svg {
+    display: inline-block; width: .95em; height: auto; vertical-align: -.14em; margin-right: .16em;
+    filter: drop-shadow(0 2px 10px rgba(6,18,34,.42));
   }
-  .stat b { display: block; font-size: 24px; font-weight: 600; letter-spacing: -.02em; }
-  .stat span { font-size: 13px; color: var(--dim); }
 
-  .sorts { display: flex; gap: 8px; margin-top: 26px; }
-  .sorts button {
+  .stats {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap);
+    margin-top: clamp(22px, 2.6vw, 34px);
+  }
+  .stat {
+    min-width: clamp(150px, 15vw, 210px); padding: clamp(14px, 1.5vw, 20px) clamp(18px, 2vw, 28px);
+    border-radius: 18px; background: var(--glass); border: 1px solid var(--edge);
+    backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%);
+    box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.16);
+  }
+  .stat b {
+    display: block; font-family: var(--helvetica);
+    font-size: clamp(28px, 3.4vw, 44px); font-weight: 700; letter-spacing: -.03em; line-height: 1.1;
+    text-shadow: 0 2px 10px rgba(6,18,34,.35);
+  }
+  .stat span { font-size: clamp(12px, 1vw, 14px); color: var(--dim); letter-spacing: .02em; }
+
+  .controls {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px;
+    margin-top: clamp(22px, 2.6vw, 32px);
+  }
+  #q {
+    font: inherit; font-size: 16px; color: var(--ink);
+    width: min(320px, 100%); padding: 11px 18px; border-radius: 999px;
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.18);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  }
+  #q::placeholder { color: var(--dim); }
+  #q:focus { outline: none; border-color: rgba(255,255,255,.55); background: rgba(255,255,255,.16); }
+
+  .controls button {
     font: inherit; font-size: 14px; color: var(--dim); cursor: pointer;
-    padding: 9px 18px; border-radius: 999px;
+    padding: 10px 18px; border-radius: 999px;
     background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14);
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
     transition: color .18s, background .18s;
   }
-  .sorts button:hover { color: var(--ink); }
-  .sorts button[aria-pressed="true"] {
+  .controls button[aria-pressed="true"] {
     color: #163150; background: rgba(255,255,255,.92); border-color: transparent; font-weight: 600;
   }
 
+  .sorts { display: contents; }
+
   .grid {
-    max-width: 1320px; margin: 0 auto; display: grid; gap: 16px;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    max-width: 1320px; margin: 0 auto; display: grid; gap: var(--gap);
+    grid-template-columns: repeat(auto-fill, minmax(clamp(160px, 15vw, 200px), 1fr));
   }
   .tile {
-    display: flex; flex-direction: column; align-items: center; gap: 12px;
-    padding: 26px 16px 22px; border-radius: 22px; text-align: center; text-decoration: none; color: inherit;
+    display: flex; flex-direction: column; align-items: center; gap: clamp(10px, 1vw, 14px);
+    padding: clamp(22px, 2.2vw, 30px) 16px clamp(18px, 1.8vw, 24px);
+    border-radius: 22px; text-align: center; text-decoration: none; color: inherit;
     background: var(--glass); border: 1px solid var(--edge);
     backdrop-filter: blur(26px) saturate(160%); -webkit-backdrop-filter: blur(26px) saturate(160%);
     box-shadow: 0 10px 30px rgba(8,22,40,.22), inset 0 1px 0 rgba(255,255,255,.18);
     transition: transform .22s cubic-bezier(.2,.8,.3,1), background .22s, box-shadow .22s;
   }
-  .tile:hover { transform: translateY(-4px); background: rgba(255,255,255,.2); box-shadow: 0 18px 44px rgba(8,22,40,.34), inset 0 1px 0 rgba(255,255,255,.28); }
+  @media (hover: hover) {
+    .tile:hover { transform: translateY(-4px); background: rgba(255,255,255,.2); box-shadow: 0 18px 44px rgba(8,22,40,.34), inset 0 1px 0 rgba(255,255,255,.28); }
+    }
+  .tile:active { transform: scale(.97); background: rgba(255,255,255,.2); }
   .tile:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
   .tile img {
-    width: 76px; height: 76px; border-radius: 50%; object-fit: cover; background: rgba(255,255,255,.14);
-    box-shadow: 0 4px 16px rgba(8,22,40,.3);
+    width: clamp(64px, 6vw, 84px); aspect-ratio: 1; border-radius: 50%; object-fit: cover;
+    background: rgba(255,255,255,.14); box-shadow: 0 4px 16px rgba(8,22,40,.3);
   }
-  .tile .name { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
-  .tile .meta { font-size: 13px; color: var(--dim); }
+  .tile .name { font-size: clamp(14px, 1.15vw, 16px); font-weight: 600; letter-spacing: -.01em; }
+  .tile .subs { margin-top: 4px; font-size: clamp(13px, 1.05vw, 14px); font-weight: 500; }
+  .tile .meta { margin-top: 2px; font-size: clamp(11px, .95vw, 12.5px); color: var(--dim); }
+
+  #empty { text-align: center; color: var(--dim); padding: 48px 0; }
+
+  /* iPhone: three stats across, search on its own row, sort pills swipe sideways. */
+  @media (max-width: 560px) {
+    h1 { font-size: clamp(28px, 8.2vw, 38px); }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .stat { min-width: 0; padding: 12px 6px; border-radius: 15px; }
+    .stat b { font-size: clamp(19px, 5.4vw, 26px); letter-spacing: -.02em; }
+    .stat span { font-size: 10.5px; line-height: 1.25; display: block; }
+    .controls { flex-direction: column; align-items: stretch; gap: 10px; }
+    #q { width: 100%; padding: 13px 18px; }
+    .sorts {
+      display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
+      margin: 0 calc(-1 * clamp(20px, 5vw, 72px)); padding: 2px clamp(20px, 5vw, 72px);
+    }
+    .sorts::-webkit-scrollbar { display: none; }
+    .sorts button { flex: none; padding: 11px 16px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+    .tile { padding: 18px 10px 16px; border-radius: 18px; }
+  }
   @media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
 </style>
 </head>
 <body>
 <header>
-  <h1><b id="count"></b> YouTube channels</h1>
+  <h1>
+    <svg viewBox="0 0 28 20" aria-hidden="true"><rect width="28" height="20" rx="5" fill="#FF0033"/><path d="M11 5.6 19 10l-8 4.4z" fill="#fff"/></svg><span id="count"></span> YouTube channels
+  </h1>
   <div class="stats" id="stats"></div>
-  <div class="sorts" role="group" aria-label="Sort channels">
-    <button data-sort="added" aria-pressed="true">Newest</button>
-    <button data-sort="popular" aria-pressed="false">Most popular</button>
-    <button data-sort="name" aria-pressed="false">A–Z</button>
+  <div class="controls">
+    <input id="q" type="search" placeholder="Search channels…" aria-label="Search channels" autocomplete="off">
+    <div class="sorts" role="group" aria-label="Sort channels">
+      <button data-sort="added" aria-pressed="true">Newest</button>
+      <button data-sort="views" aria-pressed="false">Most views</button>
+      <button data-sort="subs" aria-pressed="false">Most subscribers</button>
+      <button data-sort="name" aria-pressed="false">A–Z</button>
+    </div>
   </div>
 </header>
 <main class="grid" id="grid"></main>
+<p id="empty" hidden></p>
 
 <script src="channels.js"></script>
 <script>
   const chs = window.CHANNELS || [];
   const n = x => x.toLocaleString('en-US');
-  const compact = x => x >= 1e3 ? Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(x) : n(x);
+  const plural = (x, word) => `${n(x)} ${word}${x === 1 ? '' : 's'}`;
 
   count.textContent = n(chs.length);
-  const views = chs.reduce((a, c) => a + (c.views || 0), 0);
+  const total = k => chs.reduce((a, c) => a + c[k], 0);
   stats.innerHTML = [
-    views ? `<b>${n(views)}</b><span>views across every video</span>` : '',
-    `<b>${n(chs.reduce((a, c) => a + c.videos, 0))}</b><span>videos published</span>`,
-  ].filter(Boolean).map(h => `<div class="stat">${h}</div>`).join('');
+    [total('views'), 'total views'],
+    [total('subs'), 'total subscribers'],
+    [total('videos'), 'videos published'],
+  ].map(([v, label]) => `<div class="stat"><b>${n(v)}</b><span>${label}</span></div>`).join('');
 
   // Within one build every channel's key has the same type, so a raw < / > compare is safe:
   // "added" is a channel-creation ISO date when the API filled it in, else position in videos.txt.
-  const key = { added: c => c.added, popular: c => c.views ?? c.videos, name: c => c.name.toLowerCase() };
+  const key = { added: c => c.added, views: c => c.views, subs: c => c.subs, name: c => c.name.toLowerCase() };
   const cmp = (a, b) => a < b ? -1 : a > b ? 1 : 0;
-  const render = mode => {
+  let mode = 'added';
+
+  const render = () => {
+    const q = document.getElementById('q').value.trim().toLowerCase();
     const dir = mode === 'name' ? 1 : -1;
-    grid.innerHTML = [...chs]
-      .sort((a, b) => dir * cmp(key[mode](a), key[mode](b)))
-      .map(c => `<a class="tile" href="${c.url}" target="_blank" rel="noopener">
-        <img src="${c.icon}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
-        <div><div class="name">${c.name}</div>
-        <div class="meta">${n(c.videos)} video${c.videos === 1 ? '' : 's'}${c.views ? ` · ${compact(c.views)} views` : ''}</div></div>
-      </a>`).join('');
+    const hits = chs
+      .filter(c => c.name.toLowerCase().includes(q))
+      .sort((a, b) => dir * cmp(key[mode](a), key[mode](b)));
+    grid.innerHTML = hits.map(c => `<a class="tile" href="${c.url}" target="_blank" rel="noopener">
+      <img src="${c.icon}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+      <div>
+        <div class="name">${c.name}</div>
+        <div class="subs">${plural(c.subs, 'subscriber')}</div>
+        <div class="meta">${plural(c.videos, 'video')} · ${plural(c.views, 'view')}</div>
+      </div>
+    </a>`).join('');
+    empty.hidden = hits.length > 0;
+    empty.textContent = `No channel matches “${q}”.`;
   };
-  document.querySelector('.sorts').onclick = e => {
+
+  document.querySelector('.controls').onclick = e => {
     const b = e.target.closest('button'); if (!b) return;
-    document.querySelectorAll('.sorts button').forEach(x => x.setAttribute('aria-pressed', x === b));
-    render(b.dataset.sort);
+    document.querySelectorAll('.controls button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    mode = b.dataset.sort;
+    render();
   };
-  render('added');
+  document.getElementById('q').oninput = render;
+  render();
 </script>
 </body>
 </html>
