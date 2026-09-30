@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Channels</title>
+<style>
+  :root {
+    --glass: rgba(255,255,255,.13);
+    --edge: rgba(255,255,255,.22);
+    --ink: #f2f6ff;
+    --dim: rgba(226,236,255,.62);
+  }
+  * { box-sizing: border-box; margin: 0; }
+  body {
+    min-height: 100vh;
+    padding: clamp(28px, 5vw, 72px) clamp(20px, 5vw, 72px) 96px;
+    font: 400 16px/1.45 -apple-system, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Inter, system-ui, sans-serif;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    background: #14263f radial-gradient(120% 90% at 18% -10%, #4b7fb5 0%, #2a4f7c 38%, #14263f 78%) fixed;
+  }
+  /* soft out-of-focus orbs, like the reference photo */
+  body::before, body::after {
+    content: ""; position: fixed; z-index: -1; border-radius: 50%; filter: blur(80px);
+  }
+  body::before { width: 46vw; height: 46vw; top: -14vw; right: -8vw; background: rgba(125,178,230,.38); }
+  body::after  { width: 38vw; height: 38vw; bottom: -14vw; left: -10vw; background: rgba(58,104,160,.55); }
+
+  header { max-width: 1320px; margin: 0 auto clamp(28px, 4vw, 52px); }
+  h1 {
+    font-size: clamp(38px, 7vw, 76px); font-weight: 700; letter-spacing: -.035em; line-height: 1.02;
+  }
+  h1 b { font-weight: 700; }
+  .stats { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+  .stat {
+    padding: 12px 20px; border-radius: 16px;
+    background: var(--glass); border: 1px solid var(--edge);
+    backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%);
+  }
+  .stat b { display: block; font-size: 24px; font-weight: 600; letter-spacing: -.02em; }
+  .stat span { font-size: 13px; color: var(--dim); }
+
+  .sorts { display: flex; gap: 8px; margin-top: 26px; }
+  .sorts button {
+    font: inherit; font-size: 14px; color: var(--dim); cursor: pointer;
+    padding: 9px 18px; border-radius: 999px;
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    transition: color .18s, background .18s;
+  }
+  .sorts button:hover { color: var(--ink); }
+  .sorts button[aria-pressed="true"] {
+    color: #163150; background: rgba(255,255,255,.92); border-color: transparent; font-weight: 600;
+  }
+
+  .grid {
+    max-width: 1320px; margin: 0 auto; display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+  .tile {
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    padding: 26px 16px 22px; border-radius: 22px; text-align: center; text-decoration: none; color: inherit;
+    background: var(--glass); border: 1px solid var(--edge);
+    backdrop-filter: blur(26px) saturate(160%); -webkit-backdrop-filter: blur(26px) saturate(160%);
+    box-shadow: 0 10px 30px rgba(8,22,40,.22), inset 0 1px 0 rgba(255,255,255,.18);
+    transition: transform .22s cubic-bezier(.2,.8,.3,1), background .22s, box-shadow .22s;
+  }
+  .tile:hover { transform: translateY(-4px); background: rgba(255,255,255,.2); box-shadow: 0 18px 44px rgba(8,22,40,.34), inset 0 1px 0 rgba(255,255,255,.28); }
+  .tile:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+  .tile img {
+    width: 76px; height: 76px; border-radius: 50%; object-fit: cover; background: rgba(255,255,255,.14);
+    box-shadow: 0 4px 16px rgba(8,22,40,.3);
+  }
+  .tile .name { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+  .tile .meta { font-size: 13px; color: var(--dim); }
+  @media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
+</style>
+</head>
+<body>
+<header>
+  <h1><b id="count"></b> YouTube channels</h1>
+  <div class="stats" id="stats"></div>
+  <div class="sorts" role="group" aria-label="Sort channels">
+    <button data-sort="added" aria-pressed="true">Newest</button>
+    <button data-sort="popular" aria-pressed="false">Most popular</button>
+    <button data-sort="name" aria-pressed="false">A–Z</button>
+  </div>
+</header>
+<main class="grid" id="grid"></main>
+
+<script src="channels.js"></script>
+<script>
+  const chs = window.CHANNELS || [];
+  const n = x => x.toLocaleString('en-US');
+  const compact = x => x >= 1e3 ? Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(x) : n(x);
+
+  count.textContent = n(chs.length);
+  const views = chs.reduce((a, c) => a + (c.views || 0), 0);
+  stats.innerHTML = [
+    views ? `<b>${n(views)}</b><span>views across every video</span>` : '',
+    `<b>${n(chs.reduce((a, c) => a + c.videos, 0))}</b><span>videos published</span>`,
+  ].filter(Boolean).map(h => `<div class="stat">${h}</div>`).join('');
+
+  // Within one build every channel's key has the same type, so a raw < / > compare is safe:
+  // "added" is a channel-creation ISO date when the API filled it in, else position in videos.txt.
+  const key = { added: c => c.added, popular: c => c.views ?? c.videos, name: c => c.name.toLowerCase() };
+  const cmp = (a, b) => a < b ? -1 : a > b ? 1 : 0;
+  const render = mode => {
+    const dir = mode === 'name' ? 1 : -1;
+    grid.innerHTML = [...chs]
+      .sort((a, b) => dir * cmp(key[mode](a), key[mode](b)))
+      .map(c => `<a class="tile" href="${c.url}" target="_blank" rel="noopener">
+        <img src="${c.icon}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">
+        <div><div class="name">${c.name}</div>
+        <div class="meta">${n(c.videos)} video${c.videos === 1 ? '' : 's'}${c.views ? ` · ${compact(c.views)} views` : ''}</div></div>
+      </a>`).join('');
+  };
+  document.querySelector('.sorts').onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.querySelectorAll('.sorts button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    render(b.dataset.sort);
+  };
+  render('added');
+</script>
+</body>
+</html>
