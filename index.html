@@ -171,7 +171,9 @@
   const plural = (x, word) => `${n(x)} ${word}${x === 1 ? '' : 's'}`;
 
   const created = window.CREATED || chs.length;
-  count.textContent = n(created);
+  // The headline counts the channels actually on the page; "created" is the wider network,
+  // broken out in the first stat box.
+  count.textContent = n(chs.length);
   const total = k => chs.reduce((a, c) => a + c[k], 0);
   stats.innerHTML = [
     [created, 'channels created', `${n(chs.length)} of ${n(created)} live`],
