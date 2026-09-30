@@ -25,6 +25,19 @@ Spirit Led Living (12:10, 17:10): https://youtu.be/S8eLgKXTO0E, Short https://yo
 Videos that aren't public yet can't be resolved — the build prints them by name and skips them.
 Run it again once they premiere.
 
+### The channel total
+
+The header and the first stat box read from a `created:` line at the top of `data/videos.txt`:
+
+```
+created: 200
+```
+
+That's every channel that exists, including ones with nothing published yet — YouTube can't tell us
+about a channel until it has a public video, so this is the one number you maintain by hand. Bump it
+as you create channels and the dashboard shows `137 of 200 live`. If it's ever lower than the number
+of channels actually found, the found count wins.
+
 ### Refreshing the numbers
 
 Everything fetched is cached in `.cache.json`, so a normal build only touches channels it hasn't

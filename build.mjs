@@ -35,6 +35,10 @@ export function parseVideos(text) {
   return { order, videos };
 }
 
+// How many channels exist in total, including ones with nothing published yet — only you know
+// that, so it is declared as "created: 200" at the top of data/videos.txt.
+export const createdCount = text => +(/^created:\s*(\d+)/mi.exec(text ?? '')?.[1] || 0);
+
 // YouTube renders rounded counts: "18 subscribers", "1.2K subscribers", "3.4M subscribers".
 const SCALE = { K: 1e3, M: 1e6, B: 1e9 };
 export const count = text => {
@@ -47,7 +51,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) { // skipped when import
 const cache = await readFile(CACHE, 'utf8').then(JSON.parse).catch(() => ({}));
 cache.channels ??= {};  // name -> { id, title, url, icon, subs }
 cache.views ??= {};     // videoId -> view count
-const { order, videos } = parseVideos(await readFile(new URL('./data/videos.txt', import.meta.url), 'utf8'));
+const source = await readFile(new URL('./data/videos.txt', import.meta.url), 'utf8');
+const { order, videos } = parseVideos(source);
+const created = Math.max(createdCount(source), order.length);
 
 const pool = async (items, n, fn) => {
   const it = items[Symbol.iterator]();
@@ -130,6 +136,7 @@ const channels = order.flatMap((name, i) => {
   }];
 });
 
-await writeFile(new URL('./channels.js', import.meta.url), `window.CHANNELS = ${JSON.stringify(channels, null, 1)};\n`);
-console.error(`${channels.length} channels -> channels.js`);
+await writeFile(new URL('./channels.js', import.meta.url),
+  `window.CREATED = ${created};\nwindow.CHANNELS = ${JSON.stringify(channels, null, 1)};\n`);
+console.error(`${channels.length} of ${created} channels live -> channels.js`);
 }

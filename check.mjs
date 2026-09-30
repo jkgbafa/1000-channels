@@ -1,7 +1,7 @@
 // Runnable check: node check.mjs   (no framework, exits non-zero on failure)
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { parseVideos, count } from './build.mjs';
+import { parseVideos, count, createdCount } from './build.mjs';
 
 const { order, videos } = parseVideos(`
 Playing now:
@@ -17,6 +17,10 @@ assert.deepEqual(order, ['Dag Heward-Mills 1999', 'Spirit Led Living', 'Global B
 assert.deepEqual([...videos.get('Dag Heward-Mills 1999')], ['rvfFeguXSB0', 'BOqeD-wVtv4', 'QVjfBXZKblk'], 'youtu.be + shorts + watch?v, deduped');
 assert.deepEqual([...videos.get('Spirit Led Living')], ['S8eLgKXTO0E'], 'schedule times stripped from name');
 assert.deepEqual([...videos.get('Global Buzz')], ['oUAAJhORkQQ'], 'short-only line');
+
+assert.equal(createdCount('created: 200\n\nWitness: https://youtu.be/E_QSPULemFQ'), 200);
+assert.equal(createdCount('Witness: https://youtu.be/E_QSPULemFQ'), 0, 'absent declaration');
+assert.deepEqual(parseVideos('created: 200').order, [], 'the declaration is not a channel');
 
 // Rounded counts as YouTube renders them.
 assert.equal(count('18 subscribers'), 18);
